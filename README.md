@@ -25,7 +25,7 @@ You don't change any of these. You add `hello-app.yaml` and fill in the sections
 Docker Hub image I deployed (for example `ravi123/hello-app:v1`):
 
 ```
-<paste here>
+ himavarshinivenkatesh/hello-app:v1
 ```
 
 ## 2. Pods across nodes
@@ -33,7 +33,11 @@ Docker Hub image I deployed (for example `ravi123/hello-app:v1`):
 Output of `kubectl get pods -o wide` after you applied `hello-app.yaml`:
 
 ```
-<paste here>
+NAME                         READY   STATUS    RESTARTS        AGE   IP           NODE              NOMINATED NODE   READINESS GATES
+hello-app-66c64958d7-dclvs   1/1     Running   1 (4m59s ago)   58m   10.244.2.2   desktop-worker2   <none>           <none>
+hello-app-66c64958d7-gd8nq   1/1     Running   1 (4m59s ago)   58m   10.244.2.3   desktop-worker2   <none>           <none>
+hello-app-66c64958d7-jdkjc   1/1     Running   1 (4m59s ago)   58m   10.244.1.2   desktop-worker    <none>           <none>
+hello-app-66c64958d7-lvplt   1/1     Running   1 (4m59s ago)   58m   10.244.1.3   desktop-worker    <none>           <none>
 ```
 
 ## 3. The Service and its endpoints
@@ -41,7 +45,10 @@ Output of `kubectl get pods -o wide` after you applied `hello-app.yaml`:
 Output of `kubectl get service hello-app` and `kubectl get endpointslices -l kubernetes.io/service-name=hello-app`:
 
 ```
-<paste here>
+NAME        TYPE           CLUSTER-IP     EXTERNAL-IP   PORT(S)          AGE
+hello-app   LoadBalancer   10.96.223.87   172.18.0.5    8080:32318/TCP   59m
+NAME              ADDRESSTYPE   PORTS   ENDPOINTS                                      AGE
+hello-app-2l2dn   IPv4          80      10.244.2.3,10.244.1.2,10.244.2.2 + 1 more...   60m
 ```
 
 ## 4. Browser
@@ -51,37 +58,6 @@ Add `screenshot.png`: the page at `http://localhost:8080` with at least two Pods
 ## 5. The four traps
 
 For each trap, write what you saw and why it happened, in two or three lines of your own words.
-
-**Trap 1 — the local image.**
-
-**Trap 2 — the selector typo.**
-
-**Trap 3 — the wrong targetPort.**
-
-**Trap 4 — the EXTERNAL-IP address.**
-
-## 6. Your YAML vs the generated YAML
-
-Name two fields in the `--dry-run=client -o yaml` output that were not in your file. Why does your file still work without them?
-
-
-
-## Pods and nodes (kubectl get pods -o wide)
-NAME                         READY   STATUS    RESTARTS   AGE   IP           NODE
-hello-app-66c64958d7-dclvs   1/1     Running   0          10m   10.244.2.3   desktop-worker2
-hello-app-66c64958d7-gd8nq   1/1     Running   0          10m   10.244.2.2   desktop-worker2
-hello-app-66c64958d7-jdkjc   1/1     Running   0          10m   10.244.1.3   desktop-worker
-hello-app-66c64958d7-lvplt   1/1     Running   0          10m   10.244.1.2   desktop-worker
-
-The Pods are spread over the two worker nodes. None run on desktop-control-plane because it is reserved for cluster components.
-
-## Service (kubectl get service hello-app)
-NAME        TYPE           CLUSTER-IP     EXTERNAL-IP   PORT(S)          AGE
-hello-app   LoadBalancer   10.96.223.87   172.18.0.7    8080:32318/TCP   10m
-
-## EndpointSlice (kubectl get endpointslices -l kubernetes.io/service-name=hello-app)
-NAME              ADDRESSTYPE   PORTS   ENDPOINTS                                      AGE
-hello-app-2l2dn   IPv4          80      10.244.2.2,10.244.1.2,10.244.2.3 + 1 more...   10m
 
 ## Trap 1 - local image
 - Pods stayed in ErrImagePull / ImagePullBackOff.
@@ -132,3 +108,9 @@ service/hello-app configured
 
 ## Screenshot
 - screenshot.png shows 4 different Pod names answering at http://localhost:8080.
+
+## 6. Your YAML vs the generated YAML
+
+Name two fields in the `--dry-run=client -o yaml` output that were not in your file. Why does your file still work without them?
+
+Two fields in the generated YAML that were not in my file are strategy: {} and resources: {} (the generated output also had status: {}). My file still works without them because they are empty or default values: Kubernetes fills in a default rolling-update strategy and applies no resource limits when they are left out, and status is filled in by the cluster itself.
