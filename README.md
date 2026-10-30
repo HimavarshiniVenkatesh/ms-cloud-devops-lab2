@@ -106,13 +106,17 @@ hello-app-2l2dn   IPv4          <unset>   <unset>     14m
 - An empty EndpointSlice means the selector is wrong. Pods listed on the wrong port means the targetPort is wrong.
 
 \Documents\ms-cloud-devops-lab2> (Get-Content hello-app.yaml -Raw) -replace 'targetPort: 80','targetPort: 8080' | Set-Content hello-app.yaml
+
 \Documents\ms-cloud-devops-lab2> kubectl apply -f hello-app.yaml
 deployment.apps/hello-app unchanged
 service/hello-app configured
+
 \Documents\ms-cloud-devops-lab2> kubectl get endpointslices -l kubernetes.io/service-name=hello-app
 NAME              ADDRESSTYPE   PORTS   ENDPOINTS                                      AGE
 hello-app-2l2dn   IPv4          8080    10.244.2.2,10.244.1.2,10.244.1.3 + 1 more...   16m
+
 \Documents\ms-cloud-devops-lab2> (Get-Content hello-app.yaml -Raw) -replace 'targetPort: 8080','targetPort: 80' | Set-Content hello-app.yaml
+
 \Documents\ms-cloud-devops-lab2> kubectl apply -f hello-app.yaml
 deployment.apps/hello-app unchanged
 service/hello-app configured
